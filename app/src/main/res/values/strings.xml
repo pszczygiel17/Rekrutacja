@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Cosmic News</string>
+    <string name="menu_home_title">Home</string>
+    <string name="menu_fav_title">Favourites</string>
+    <string name="item_title">Title</string>
+    <string name="item_description">Description</string>
+    <string name="item_date">01 January 1990</string>
+    <string name="share_item_title">Share</string>
+    <string name="error_btn">Try Again</string>
+    <string name="error_message">Error Message</string>
+    <string name="error_title">Error Title</string>
+</resources>
