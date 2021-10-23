@@ -54,7 +54,6 @@ public class Articles {
 
 
     public int getId() {return  id; }
-    //public boolean getFeatured() {return featured; }
     public String getTitle() {
         return title;
     }
@@ -62,14 +61,10 @@ public class Articles {
     public String getImageUrl() {
         return imageUrl;
     }
-    //public String getNewsSite() {return newsSite; }
     public String getSummary() {return summary;}
     public String getPublishedAt() {
         return publishedAt;
     }
-    //public String getUpdatedAt() {return updatedAt; }
-    //public List<Launches> getLaunches() {return launches; }
-    //public List<Events> getEvents() { return events; }
 }
 
 

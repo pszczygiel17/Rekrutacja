@@ -13,10 +13,9 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 
-//implments offset bla bla
 public class NewsDetailActivity extends AppCompatActivity {
 
-    private String mUrl, mTitle; //mImg, mTitle;
+    private String mUrl, mTitle;
 
 
     @Override
@@ -29,10 +28,8 @@ public class NewsDetailActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
         Intent intent = getIntent();
         mUrl = intent.getStringExtra("url");
-        //mImg = intent.getStringExtra("img");
         mTitle = intent.getStringExtra("title");
 
         initWebView(mUrl);
@@ -64,10 +61,6 @@ public class NewsDetailActivity extends AppCompatActivity {
         return super.onSupportNavigateUp();
     }
 
-    //@Override
-    //public void onOffsetChanged(AppBarLayout appBarLayout, int i) {
-
-    //}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -82,15 +75,14 @@ public class NewsDetailActivity extends AppCompatActivity {
 
         if (id == R.id.share) {
             try {
-                //Toast.makeText(getApplicationContext(), "siema", Toast.LENGTH_LONG).show();
                 Intent i = new Intent(Intent.ACTION_SEND);
-                i.setType("text/plan");
-                //i.putExtra(Intent.EXTRA_SUBJECT, "Headline from " + mSource);
-                String body = mTitle + "\n\n" + mUrl + "\n\n" + "Shared via Sport News App" + "\n";
+                i.setType("text/plain");
+                String body = mTitle + "\n\n" + mUrl + "\n";
                 i.putExtra(Intent.EXTRA_TEXT, body);
                 startActivity(Intent.createChooser(i, "Share with:"));
             } catch (Exception e) {
-                Toast.makeText(this, "Something went wrong with sharing", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+                Toast.makeText(getApplicationContext(), "Sharing error!", Toast.LENGTH_SHORT).show();
             }
         }
 

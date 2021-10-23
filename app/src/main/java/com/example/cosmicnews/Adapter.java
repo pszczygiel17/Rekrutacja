@@ -34,7 +34,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder> {
     private OnItemClickListener onItemClickListener;
     DatabaseHelper db;
 
-
     public Adapter(List<Articles> articles, Context context) {
         this.articles = articles;
         this.context = context;

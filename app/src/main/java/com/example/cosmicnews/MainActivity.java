@@ -7,9 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -17,11 +14,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.cosmicnews.api.ApiClient;
 import com.example.cosmicnews.api.ApiInterface;
@@ -107,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         db = new DatabaseHelper(this);
 
         if (fav){
-            Toast.makeText(getApplicationContext(), String.valueOf(db.getFav()), Toast.LENGTH_LONG).show();
             getFavouriteArticles(db.getFav());
         }
         else {
@@ -121,22 +117,13 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             @Override
             public void OnItemClick(View view, int position) {
 
-                ImageView imageView = view.findViewById(R.id.img);
-
                 Intent intent = new Intent(MainActivity.this, NewsDetailActivity.class);
 
                 Articles article = articles.get(position);
                 intent.putExtra("url", article.getUrl());
                 intent.putExtra("title", article.getTitle());
-                //intent.putExtra("img", article.getImageUrl());
 
-                Pair<View, String> pair = Pair.create((View) imageView, ViewCompat.getTransitionName(imageView));
-                ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                        MainActivity.this,
-                        pair
-                );
-
-                startActivity(intent, optionsCompat.toBundle());
+                startActivity(intent);
             }
         });
 
@@ -158,13 +145,16 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             });
     }
 
-    private void showErrorMessage(String title, String message){
+    private void showErrorMessage(String title, String message, int imageView, boolean btn){
 
         if (errorLayout.getVisibility() == View.GONE) {
             errorLayout.setVisibility(View.VISIBLE);
         }
 
-        errorImage.setImageResource(R.drawable.no_result);
+        if(btn) errorButton.setVisibility(View.VISIBLE);
+        else errorButton.setVisibility(View.INVISIBLE);
+
+        errorImage.setImageResource(imageView);
         errorTitle.setText(title);
         errorMessage.setText(message);
 
@@ -175,36 +165,63 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }
         });
 
-
+        disableEnableControls(false, swipeRefreshLayout);
 
     }
 
     private void getFavouriteArticles(final List<Integer> tab){
-        final List<Articles> ar = new ArrayList<>();
-        for(int i = 0; i < tab.size() ; i++){
-            ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
-            Call<Articles> call = apiInterface.getArticle(tab.get(i));
+        if (tab.isEmpty()){
+            swipeRefreshLayout.setRefreshing(false);
+            showErrorMessage("No favourites!", "Add an article to your favorites,", R.drawable.no_fav, false);
+        }
+        else{
+            final List<Articles> ar = new ArrayList<>();
+            for(int i = 0; i < tab.size() ; i++) {
+                ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
+                Call<Articles> call = apiInterface.getArticle(tab.get(i));
 
-            final int finalI = i;
-            call.enqueue(new Callback<Articles>() {
-                @Override
-                public void onResponse(@NonNull Call<Articles> call, @NonNull Response<Articles> response) {
-                    ar.add(response.body());
-                    if (finalI == tab.size() - 1) {
-                        articles = ar;
-                        adapter = new Adapter(articles, MainActivity.this);
-                        recyclerView.setAdapter(adapter);
-                        adapter.notifyDataSetChanged();
-                        initListener();
-                        swipeRefreshLayout.setRefreshing(false);
+                final int finalI = i;
+                call.enqueue(new Callback<Articles>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Articles> call, @NonNull Response<Articles> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            ar.add(response.body());
+                            if (finalI == tab.size() - 1) {
+                                articles = ar;
+                                adapter = new Adapter(articles, MainActivity.this);
+                                recyclerView.setAdapter(adapter);
+                                adapter.notifyDataSetChanged();
+                                initListener();
+                                swipeRefreshLayout.setRefreshing(false);
+                            }
+                        }else {
+
+                            swipeRefreshLayout.setRefreshing(false);
+
+                            String errorCode;
+                            switch (response.code()) {
+                                case 404:
+                                    errorCode = "404 not found";
+                                    break;
+                                case 500:
+                                    errorCode = "500 server broken";
+                                    break;
+                                default:
+                                    errorCode = "unknown error";
+                                    break;
+                            }
+
+                            showErrorMessage("No Result", "Try again later.\n" + errorCode, R.drawable.no_result, true);
+                        }
                     }
-                }
 
-                @Override
-                public void onFailure(@NonNull Call<Articles> call, @NonNull Throwable t) {
-
-                }
-            });
+                    @Override
+                    public void onFailure(@NonNull Call<Articles> call, @NonNull Throwable t) {
+                        swipeRefreshLayout.setRefreshing(false);
+                        showErrorMessage("Network error!", "Please check your network connection.", R.drawable.no_conn, true);
+                    }
+                });
+            }
 
         }
     }
@@ -247,22 +264,28 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                             break;
                     }
 
-                    showErrorMessage(
-                            "No Result",
-                            "Try again later.\n" + errorCode);
+                    showErrorMessage("No Result", "Try again later.\n" + errorCode, R.drawable.no_result, true);
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<List<Articles>> call, @NonNull Throwable t) {
                 swipeRefreshLayout.setRefreshing(false);
-                showErrorMessage(
-                        "Oops...",
-                        "Network failure, try again later.\n" + t.toString());
+                showErrorMessage("Network error!", "Please check your network connection.", R.drawable.no_conn, true);
             }
         });
 
 
+    }
+
+    private void disableEnableControls(boolean enable, ViewGroup vg){
+        for (int i = 0; i < vg.getChildCount(); i++){
+            View child = vg.getChildAt(i);
+            child.setEnabled(enable);
+            if (child instanceof ViewGroup){
+                disableEnableControls(enable, (ViewGroup)child);
+            }
+        }
     }
 
 

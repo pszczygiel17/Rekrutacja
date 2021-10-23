@@ -11,11 +11,11 @@
 
     <ImageView
         android:id="@+id/errorImage"
-        android:src="@drawable/no_result"
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="60dp"
+        android:tint="@color/colorAccent"
         tools:ignore="ContentDescription" />
 
     <TextView
