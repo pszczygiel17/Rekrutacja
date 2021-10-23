@@ -71,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         errorButton = findViewById(R.id.errorButton);
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        //handling bottom navigation items
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
 
             @RequiresApi(api = Build.VERSION_CODES.O)
@@ -80,13 +82,13 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 switch (menuItem.getItemId())
                 {
                     case R.id.home:
-                        fav = false;
-                        menuItem.setChecked(true);
+                        fav = false; //top articles
+                        menuItem.setChecked(true); //changing item appearance with a selector
                         LoadJson();
                         break;
                     case R.id.favourites:
-                        fav = true;
-                        menuItem.setChecked(true);
+                        fav = true; //only favourites
+                        menuItem.setChecked(true); //changing item appearance with a selector
                         LoadJson();
                         break;
                 }
@@ -97,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     }
 
+    //loading list of favourites articles or top articles
     public void LoadJson(){
 
         errorLayout.setVisibility(View.GONE);
@@ -104,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         db = new DatabaseHelper(this);
 
         if (fav){
+            //loading list of favourites using list of ids from database
             getFavouriteArticles(db.getFav());
         }
         else {
@@ -112,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     }
 
+    //sending url and title to NewsDetailActivity from the selected article
     private void initListener(){
         adapter.setOnItemClickListener(new Adapter.OnItemClickListener() {
             @Override
@@ -145,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             });
     }
 
+    //calling errorLayout with selected title, message, img and optional button
     private void showErrorMessage(String title, String message, int imageView, boolean btn){
 
         if (errorLayout.getVisibility() == View.GONE) {
@@ -165,10 +171,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }
         });
 
+        //not touchable invisible layout
         disableEnableControls(false, swipeRefreshLayout);
 
     }
 
+    //handling favourites articles with retrofit
     private void getFavouriteArticles(final List<Integer> tab){
         if (tab.isEmpty()){
             swipeRefreshLayout.setRefreshing(false);
@@ -227,6 +235,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
 
+    //handling top articles with retrofit
     private void getAllArticles(){
         final ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
         Call<List<Articles>> call = apiInterface.getArticles();
@@ -278,6 +287,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     }
 
+    //not touchable invisible layout and its children with recursion
     private void disableEnableControls(boolean enable, ViewGroup vg){
         for (int i = 0; i < vg.getChildCount(); i++){
             View child = vg.getChildAt(i);

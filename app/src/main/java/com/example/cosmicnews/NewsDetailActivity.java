@@ -23,11 +23,13 @@ public class NewsDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_news_detail);
 
+        //toolbar for a single article
         Toolbar toolbar = findViewById(R.id.appbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        //taking url and title from the selected article
         Intent intent = getIntent();
         mUrl = intent.getStringExtra("url");
         mTitle = intent.getStringExtra("title");
@@ -35,6 +37,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         initWebView(mUrl);
     }
 
+    //displaying a specific article based on a url
     @SuppressLint("SetJavaScriptEnabled")
     private void initWebView(String url) {
         WebView webView = findViewById(R.id.webView);
@@ -49,6 +52,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         webView.loadUrl(url);
     }
 
+    //when backButton is clicked
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -61,13 +65,14 @@ public class NewsDetailActivity extends AppCompatActivity {
         return super.onSupportNavigateUp();
     }
 
-
+    //creating menu options on toolbar (sharing btn)
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_news, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
+    //handling options on toolbar
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 

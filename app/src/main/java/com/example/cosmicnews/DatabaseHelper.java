@@ -34,6 +34,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    //adding id of favourite article to db
     public boolean addToFav(int id){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -41,6 +42,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.insert(fav, null, cv) != -1;
     }
 
+    //getting list of ids favourites articles
     public List<Integer> getFav(){
         List<Integer> ids = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -53,6 +55,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return ids;
     }
 
+    //deleting id of favourite article from db
     public  boolean deleteFromFav(String num){
         SQLiteDatabase db = this.getWritableDatabase();
         return db.delete(fav, "NUM = ?", new String[]{num}) > 0;

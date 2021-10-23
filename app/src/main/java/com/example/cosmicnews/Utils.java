@@ -8,6 +8,7 @@ import java.util.Date;
 
 public class Utils {
 
+    //taking date from api and returning clearer date
     @SuppressLint("SimpleDateFormat")
     public static String convertDate(String time){
         String displayDate = null;

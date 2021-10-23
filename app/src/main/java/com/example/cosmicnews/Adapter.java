@@ -54,6 +54,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder> {
         RequestOptions requestOptions = new RequestOptions();
         db = new DatabaseHelper(context);
 
+        //loading img of item (article)
         Glide.with(context)
                 .load(model.getImageUrl())
                 .apply(requestOptions)
@@ -73,14 +74,21 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder> {
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(holder.imageView);
 
+        //setting title, description and date on the items (list of articles)
         holder.title.setText(model.getTitle());
         holder.desc.setText(model.getSummary());
         holder.published_at.setText(Utils.convertDate(model.getPublishedAt()));
+
+        //marking which articles are favorite
         if (db.getFav().contains(model.getId())) holder.star.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorPrimary)));
+
+        //handling favourites articles icon
         holder.star.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("ResourceType")
             @Override
             public void onClick(View v) {
+
+                //when an article is removed from favorites...
                 if(db.getFav().contains(model.getId())){
                     if(db.deleteFromFav(String.valueOf(model.getId()))) {
                         holder.star.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.grey)));
@@ -90,6 +98,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder> {
                         Toast.makeText(context.getApplicationContext(), "Failed to remove from favorites", Toast.LENGTH_LONG).show();
                     }
                 }
+
+                //when an article is added to favorites...
                 else {
                     if(db.addToFav(model.getId())){
                         holder.star.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorPrimary)));
