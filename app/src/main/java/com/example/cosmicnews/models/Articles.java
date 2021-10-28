@@ -52,6 +52,24 @@ public class Articles {
     @Expose
     private List<Events> events;
 
+    public Articles(){
+
+    }
+
+    public Articles(int id, boolean featured, String title, String url, String imageUrl, String newsSite, String summary, String publishedAt, String updatedAt, List<Launches> launches, List<Events> events) {
+        this.id = id;
+        this.featured = featured;
+        this.title = title;
+        this.url = url;
+        this.imageUrl = imageUrl;
+        this.newsSite = newsSite;
+        this.summary = summary;
+        this.publishedAt = publishedAt;
+        this.updatedAt = updatedAt;
+        this.launches = launches;
+        this.events = events;
+    }
+
 
     public int getId() {return  id; }
     public String getTitle() {

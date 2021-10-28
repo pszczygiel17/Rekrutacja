@@ -17,13 +17,14 @@
         android:background="@color/colorBackground">
 
         <android.support.v4.widget.NestedScrollView
-            android:id="@+id/nested"
+            android:id="@+id/nestedSV"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <LinearLayout
+                android:id="@+id/linear"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical">
 
 
@@ -35,6 +36,13 @@
 
 
                 </android.support.v7.widget.RecyclerView>
+
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+
 
 
             </LinearLayout>

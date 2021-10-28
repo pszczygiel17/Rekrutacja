@@ -1,12 +1,16 @@
 package com.example.cosmicnews;
 
 import android.annotation.SuppressLint;
+
 import android.content.Intent;
+
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
+
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -17,14 +21,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.cosmicnews.api.ApiClient;
 import com.example.cosmicnews.api.ApiInterface;
 import com.example.cosmicnews.models.Articles;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -38,6 +52,14 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private Adapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RelativeLayout errorLayout;
+
+
+    private NestedScrollView nestedSV;
+    int count = 0;
+    LinearLayout linearLayout;
+    ProgressBar progressBar;
+
+
     private ImageView errorImage;
     private TextView errorTitle, errorMessage;
     private Button errorButton;
@@ -64,6 +86,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         onLoadingSwipeRefresh();
 
+        nestedSV = findViewById(R.id.nestedSV);
+        linearLayout = findViewById(R.id.linear);
+        progressBar = findViewById(R.id.progress_bar);
+
         errorLayout = findViewById(R.id.errorLayout);
         errorImage = findViewById(R.id.errorImage);
         errorTitle = findViewById(R.id.errorTitle);
@@ -83,11 +109,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 {
                     case R.id.home:
                         fav = false; //top articles
+                        nestedSV.smoothScrollTo(0, nestedSV.getTop());
+                        count = 0;
                         menuItem.setChecked(true); //changing item appearance with a selector
                         LoadJson();
                         break;
                     case R.id.favourites:
                         fav = true; //only favourites
+                        nestedSV.smoothScrollTo(0, nestedSV.getTop());
+                        progressBar.setVisibility(View.GONE);
                         menuItem.setChecked(true); //changing item appearance with a selector
                         LoadJson();
                         break;
@@ -95,6 +125,30 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 return false;
             }
         });
+
+
+
+        nestedSV.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if(!fav) {
+                    if (scrollY == v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight()) {
+                        count++;
+                        Toast.makeText(getApplicationContext(), String.valueOf(articles.get(articles.size()-1).getId()), Toast.LENGTH_LONG).show();
+                        progressBar.setVisibility(View.VISIBLE);
+                        if (count >= 1) progressBar.setVisibility(View.GONE);
+                        if (count < 40) {
+                            //11314, 11312, 11311 correct for example
+                            //11310 error for example
+                            List<Integer> l = Arrays.asList(11314,11312,11311);
+                            getMoreArticles(l);
+                        }
+                    }
+                }
+            }
+        });
+
+
 
 
     }
@@ -106,13 +160,22 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         swipeRefreshLayout.setRefreshing(true);
         db = new DatabaseHelper(this);
 
+
+
         if (fav){
             //loading list of favourites using list of ids from database
-            getFavouriteArticles(db.getFav());
+            getMoreArticles(db.getFav());
+
+            for (int i = 2; i < linearLayout.getChildCount(); i++){
+                View child = linearLayout.getChildAt(i);
+                child.setVisibility(View.GONE);
+            }
+
         }
         else {
             getAllArticles();
         }
+
 
     }
 
@@ -137,6 +200,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public void onRefresh() {
+        for (int i = 2; i < linearLayout.getChildCount(); i++){
+            View child = linearLayout.getChildAt(i);
+            child.setVisibility(View.GONE);
+        }
+        count = 0;
         LoadJson();
     }
 
@@ -167,71 +235,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         errorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                for (int i = 2; i < linearLayout.getChildCount(); i++){
+                    View child = linearLayout.getChildAt(i);
+                    child.setVisibility(View.GONE);
+                }
+                count = 0;
                 onLoadingSwipeRefresh();
+                nestedSV.smoothScrollTo(0, nestedSV.getTop());
             }
         });
 
         //not touchable invisible layout
         disableEnableControls(false, swipeRefreshLayout);
 
-    }
-
-    //handling favourites articles with retrofit
-    private void getFavouriteArticles(final List<Integer> tab){
-        if (tab.isEmpty()){
-            swipeRefreshLayout.setRefreshing(false);
-            showErrorMessage("No favourites!", "Add an article to your favorites,", R.drawable.no_fav, false);
-        }
-        else{
-            final List<Articles> ar = new ArrayList<>();
-            for(int i = 0; i < tab.size() ; i++) {
-                ApiInterface apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
-                Call<Articles> call = apiInterface.getArticle(tab.get(i));
-
-                final int finalI = i;
-                call.enqueue(new Callback<Articles>() {
-                    @Override
-                    public void onResponse(@NonNull Call<Articles> call, @NonNull Response<Articles> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            ar.add(response.body());
-                            if (finalI == tab.size() - 1) {
-                                articles = ar;
-                                adapter = new Adapter(articles, MainActivity.this);
-                                recyclerView.setAdapter(adapter);
-                                adapter.notifyDataSetChanged();
-                                initListener();
-                                swipeRefreshLayout.setRefreshing(false);
-                            }
-                        }else {
-
-                            swipeRefreshLayout.setRefreshing(false);
-
-                            String errorCode;
-                            switch (response.code()) {
-                                case 404:
-                                    errorCode = "404 not found";
-                                    break;
-                                case 500:
-                                    errorCode = "500 server broken";
-                                    break;
-                                default:
-                                    errorCode = "unknown error";
-                                    break;
-                            }
-
-                            showErrorMessage("No Result", "Try again later.\n" + errorCode, R.drawable.no_result, true);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<Articles> call, @NonNull Throwable t) {
-                        swipeRefreshLayout.setRefreshing(false);
-                        showErrorMessage("Network error!", "Please check your network connection.", R.drawable.no_conn, true);
-                    }
-                });
-            }
-
-        }
     }
 
 
@@ -297,6 +313,92 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             }
         }
     }
+
+    private RecyclerView addRV(){
+        RecyclerView rv = new RecyclerView(this);
+        rv.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.setVisibility(View.VISIBLE);
+        linearLayout.addView(rv);
+        return rv;
+    }
+
+    private ProgressBar addPB(){
+        ProgressBar pb = new ProgressBar(this);
+        pb.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        pb.setVisibility(View.VISIBLE);
+        linearLayout.addView(pb);
+        return pb;
+    }
+
+
+    @SuppressLint("CheckResult")
+    private void getMoreArticles(List<Integer> l) {
+        if (l.isEmpty() && fav){
+            swipeRefreshLayout.setRefreshing(false);
+            showErrorMessage("No favourites!", "Add an article to your favorites,", R.drawable.no_fav, false);
+        }
+        else {
+            ApiInterface apiInterface = ApiClient.getApiClientRX().create(ApiInterface.class);
+
+            List<Observable<?>> requests = new ArrayList<>();
+            for (int id : l) {
+                requests.add(apiInterface.getArticle1(id).onErrorResumeNext(Observable.<Articles>empty()));
+            }
+
+            Observable.zip(requests, new Function<Object[], List<Articles>>() {
+                @Override
+                public List<Articles> apply(@NonNull Object[] objects) {
+                    List<Articles> articlesArrayList = new ArrayList<>();
+                    for (Object response : objects) {
+                        articlesArrayList.add((Articles) response);
+                    }
+                    return articlesArrayList;
+                }
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnError(new Consumer<Throwable>() {
+                        @Override
+                        public void accept(Throwable error) {
+                        }
+                    })
+                    .onErrorResumeNext(Observable.<List<Articles>>empty())
+                    .subscribe(
+                            new Consumer<List<Articles>>() {
+                                @Override
+                                public void accept(List<Articles> articlesList) {
+                                    adapter = new Adapter(articlesList, MainActivity.this);
+
+                                    if (fav) recyclerView.setAdapter(adapter);
+                                    else addRV().setAdapter(adapter);
+
+                                    if (!fav) addPB();
+                                    adapter.notifyDataSetChanged();
+                                    initListener();
+                                    swipeRefreshLayout.setRefreshing(false);
+
+                                    if (!fav) linearLayout.getChildAt(linearLayout.getChildCount()-3).setVisibility(View.GONE);
+                                }
+                            },
+                            new Consumer<Throwable>() {
+                                @Override
+                                public void accept(Throwable e) {
+                                    //Exception ex = new Exception(e);
+                                    //try {
+                                      //  throw ex;
+                                    //} catch (NetworkErrorException exception) {
+                                        //swipeRefreshLayout.setRefreshing(false);
+                                        //showErrorMessage("Network error!", "Please check your network connection.", R.drawable.no_conn, true);
+                                   // }
+
+                                }
+                            }
+                    ).isDisposed();
+        }
+
+    }
+
 
 
 }
