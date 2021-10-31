@@ -12,6 +12,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import java.util.Objects;
+
 
 public class NewsDetailActivity extends AppCompatActivity {
 
@@ -27,7 +29,7 @@ public class NewsDetailActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.appbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
         //taking url and title from the selected article
         Intent intent = getIntent();

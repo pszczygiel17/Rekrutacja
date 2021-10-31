@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 
 import android.content.Intent;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
 
 import android.support.v4.widget.NestedScrollView;
@@ -25,7 +23,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.cosmicnews.api.ApiClient;
 import com.example.cosmicnews.api.ApiInterface;
@@ -38,7 +35,6 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Call;
@@ -48,26 +44,25 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener{
 
     private RecyclerView recyclerView;
-    private List<Articles> articles = new ArrayList<>();
+    private List<Articles> articles = new ArrayList<>(); //top articles
     private Adapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RelativeLayout errorLayout;
 
-
     private NestedScrollView nestedSV;
-    int count = 0;
+    int count = 0; //counting pages
+    int pages = 10; //max number of pages to display
+    int numLoadingArticles = 5;
     LinearLayout linearLayout;
     ProgressBar progressBar;
-
 
     private ImageView errorImage;
     private TextView errorTitle, errorMessage;
     private Button errorButton;
-    private boolean fav = false;
+    private boolean fav = false; //fav view or home view
 
     BottomNavigationView bottomNavigationView;
     DatabaseHelper db;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,22 +96,22 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         //handling bottom navigation items
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
 
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @SuppressLint({"ResourceAsColor", "NonConstantResourceId"})
+            @SuppressLint("NonConstantResourceId")
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 switch (menuItem.getItemId())
                 {
                     case R.id.home:
                         fav = false; //top articles
-                        nestedSV.smoothScrollTo(0, nestedSV.getTop());
+                        nestedSV.smoothScrollTo(0, nestedSV.getTop()); //focus on the top
+                        progressBar.setVisibility(View.VISIBLE);
                         count = 0;
                         menuItem.setChecked(true); //changing item appearance with a selector
                         LoadJson();
                         break;
                     case R.id.favourites:
                         fav = true; //only favourites
-                        nestedSV.smoothScrollTo(0, nestedSV.getTop());
+                        nestedSV.smoothScrollTo(0, nestedSV.getTop()); //focus on the top
                         progressBar.setVisibility(View.GONE);
                         menuItem.setChecked(true); //changing item appearance with a selector
                         LoadJson();
@@ -127,30 +122,25 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         });
 
 
-
+        //handling scrolling
         nestedSV.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
             @Override
             public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
                 if(!fav) {
                     if (scrollY == v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight()) {
-                        count++;
-                        Toast.makeText(getApplicationContext(), String.valueOf(articles.get(articles.size()-1).getId()), Toast.LENGTH_LONG).show();
-                        progressBar.setVisibility(View.VISIBLE);
-                        if (count >= 1) progressBar.setVisibility(View.GONE);
-                        if (count < 40) {
-                            //11314, 11312, 11311 correct for example
-                            //11310 error for example
-                            List<Integer> l = Arrays.asList(11314,11312,11311);
+                        count++; //counting pages
+                        if (count < pages) {
+                            List<Integer> l = getNextIds(articles.get(articles.size()-1).getId()); //list of next articles
                             getMoreArticles(l);
+                        }
+                        else{
+                            //hiding the last progress bar
+                            linearLayout.getChildAt(linearLayout.getChildCount()-1).setVisibility(View.GONE);
                         }
                     }
                 }
             }
         });
-
-
-
-
     }
 
     //loading list of favourites articles or top articles
@@ -160,23 +150,13 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         swipeRefreshLayout.setRefreshing(true);
         db = new DatabaseHelper(this);
 
-
-
         if (fav){
-            //loading list of favourites using list of ids from database
-            getMoreArticles(db.getFav());
-
-            for (int i = 2; i < linearLayout.getChildCount(); i++){
-                View child = linearLayout.getChildAt(i);
-                child.setVisibility(View.GONE);
-            }
-
+            getMoreArticles(db.getFav()); //loading list of favourites using list of ids from database
+            hideUnnecessaryViews();
         }
         else {
             getAllArticles();
         }
-
-
     }
 
     //sending url and title to NewsDetailActivity from the selected article
@@ -200,22 +180,19 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     @Override
     public void onRefresh() {
-        for (int i = 2; i < linearLayout.getChildCount(); i++){
-            View child = linearLayout.getChildAt(i);
-            child.setVisibility(View.GONE);
-        }
+        hideUnnecessaryViews();
         count = 0;
         LoadJson();
     }
 
     private void onLoadingSwipeRefresh(){
         swipeRefreshLayout.post(
-            new Runnable() {
-                @Override
-                public void run() {
-                    LoadJson();
-                }
-            });
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        LoadJson();
+                    }
+                });
     }
 
     //calling errorLayout with selected title, message, img and optional button
@@ -235,10 +212,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         errorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for (int i = 2; i < linearLayout.getChildCount(); i++){
-                    View child = linearLayout.getChildAt(i);
-                    child.setVisibility(View.GONE);
-                }
+                hideUnnecessaryViews();
                 count = 0;
                 onLoadingSwipeRefresh();
                 nestedSV.smoothScrollTo(0, nestedSV.getTop());
@@ -288,7 +262,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                             errorCode = "unknown error";
                             break;
                     }
-
                     showErrorMessage("No Result", "Try again later.\n" + errorCode, R.drawable.no_result, true);
                 }
             }
@@ -314,6 +287,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     }
 
+    //adds a recycler view for next articles
     private RecyclerView addRV(){
         RecyclerView rv = new RecyclerView(this);
         rv.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT));
@@ -323,16 +297,16 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         return rv;
     }
 
-    private ProgressBar addPB(){
+    //adds a progress bar
+    private void addPB(){
         ProgressBar pb = new ProgressBar(this);
         pb.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         pb.setVisibility(View.VISIBLE);
         linearLayout.addView(pb);
-        return pb;
     }
 
 
-    @SuppressLint("CheckResult")
+    //handling favourites and more articles with retrofit/rxjava
     private void getMoreArticles(List<Integer> l) {
         if (l.isEmpty() && fav){
             swipeRefreshLayout.setRefreshing(false);
@@ -340,10 +314,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
         else {
             ApiInterface apiInterface = ApiClient.getApiClientRX().create(ApiInterface.class);
-
             List<Observable<?>> requests = new ArrayList<>();
             for (int id : l) {
-                requests.add(apiInterface.getArticle1(id).onErrorResumeNext(Observable.<Articles>empty()));
+                requests.add(apiInterface.getArticle(id).onErrorReturnItem(new Articles()));
             }
 
             Observable.zip(requests, new Function<Object[], List<Articles>>() {
@@ -351,54 +324,58 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 public List<Articles> apply(@NonNull Object[] objects) {
                     List<Articles> articlesArrayList = new ArrayList<>();
                     for (Object response : objects) {
-                        articlesArrayList.add((Articles) response);
+                        if (((Articles) response).getId() != 0) {
+                            articlesArrayList.add((Articles) response);
+                        }
                     }
                     return articlesArrayList;
                 }
             })
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .doOnError(new Consumer<Throwable>() {
-                        @Override
-                        public void accept(Throwable error) {
-                        }
-                    })
-                    .onErrorResumeNext(Observable.<List<Articles>>empty())
                     .subscribe(
                             new Consumer<List<Articles>>() {
                                 @Override
                                 public void accept(List<Articles> articlesList) {
                                     adapter = new Adapter(articlesList, MainActivity.this);
 
-                                    if (fav) recyclerView.setAdapter(adapter);
-                                    else addRV().setAdapter(adapter);
+                                    if (fav) recyclerView.setAdapter(adapter); //favourites
+                                    else addRV().setAdapter(adapter); //articles added during scrolling
 
                                     if (!fav) addPB();
                                     adapter.notifyDataSetChanged();
                                     initListener();
                                     swipeRefreshLayout.setRefreshing(false);
 
-                                    if (!fav) linearLayout.getChildAt(linearLayout.getChildCount()-3).setVisibility(View.GONE);
+                                    if (!fav) linearLayout.getChildAt(linearLayout.getChildCount()-3).setVisibility(View.GONE); //hiding the previous progress bar
+                                    if(progressBar.getVisibility() == View.VISIBLE) progressBar.setVisibility(View.GONE);
                                 }
                             },
                             new Consumer<Throwable>() {
                                 @Override
                                 public void accept(Throwable e) {
-                                    //Exception ex = new Exception(e);
-                                    //try {
-                                      //  throw ex;
-                                    //} catch (NetworkErrorException exception) {
-                                        //swipeRefreshLayout.setRefreshing(false);
-                                        //showErrorMessage("Network error!", "Please check your network connection.", R.drawable.no_conn, true);
-                                   // }
 
                                 }
                             }
                     ).isDisposed();
         }
-
     }
 
+    //returns a ids list of the next 5 articles
+    private List<Integer> getNextIds(int last){
+        List<Integer> integerList = new ArrayList<>();
+        int z = numLoadingArticles*(count-1);
+        for(int i = last - 1 - z; i >= last - numLoadingArticles - z; i--){
+            integerList.add(i);
+        }
+        return  integerList;
+    }
 
-
+    //hides dynamically created views
+    private void hideUnnecessaryViews(){
+        for (int i = 2; i < linearLayout.getChildCount(); i++){
+            View child = linearLayout.getChildAt(i);
+            child.setVisibility(View.GONE);
+        }
+    }
 }

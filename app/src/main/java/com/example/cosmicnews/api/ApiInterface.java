@@ -17,9 +17,6 @@ public interface ApiInterface {
     Call<List<Articles>> getArticles();
 
     @GET("articles/{id}")
-    Call<Articles> getArticle(@Path("id") int id);
-
-    @GET("articles/{id}")
-    Observable<Articles> getArticle1(@Path("id") int id);
+    Observable<Articles> getArticle(@Path("id") int id);
 
 }

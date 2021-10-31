@@ -20,23 +20,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="01814bb9-a5b7-4874-8cc1-68b441aef9f3" name="Default Changelist" comment="ixing the main layout">
-      <change beforePath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/build_file_checksums.ser" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/app/CosmicNews.app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/app/CosmicNews.app.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/cosmicnews/MainActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/cosmicnews/MainActivity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/cosmicnews/api/ApiClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/cosmicnews/api/ApiClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/cosmicnews/NewsDetailActivity.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/cosmicnews/NewsDetailActivity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/cosmicnews/api/ApiInterface.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/cosmicnews/api/ApiInterface.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/cosmicnews/models/Articles.java" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/cosmicnews/models/Articles.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[b6p7o7bqdq65bapj]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -171,7 +166,14 @@
       <option name="project" value="LOCAL" />
       <updated>1635033196335</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="manually more articles while scrolling">
+      <created>1635464696972</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1635464696972</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -193,7 +195,9 @@
     <MESSAGE value="Initial Commit" />
     <MESSAGE value="errors, sharing" />
     <MESSAGE value="ixing the main layout" />
-    <option name="LAST_COMMIT_MESSAGE" value="ixing the main layout" />
+    <MESSAGE value="getting more articles while scrolling" />
+    <MESSAGE value="manually more articles while scrolling" />
+    <option name="LAST_COMMIT_MESSAGE" value="manually more articles while scrolling" />
   </component>
   <component name="WindowStateProjectService">
     <state x="654" y="275" key="#Notifications" timestamp="1634039671516">
@@ -204,10 +208,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="576" y="202" key="#Web_Browsers/0.0.1536.824@0.0.1536.824" timestamp="1634950106478" />
-    <state x="574" y="119" key="#com.intellij.ide.util.MemberChooser" timestamp="1635188782628">
+    <state x="574" y="119" key="#com.intellij.ide.util.MemberChooser" timestamp="1635714617174">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="574" y="119" key="#com.intellij.ide.util.MemberChooser/0.0.1536.824@0.0.1536.824" timestamp="1635188782628" />
+    <state x="574" y="119" key="#com.intellij.ide.util.MemberChooser/0.0.1536.824@0.0.1536.824" timestamp="1635714617174" />
     <state x="499" y="159" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1634996726719">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -232,22 +236,22 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="559" y="118" key="Github.UntrackedFilesDialog/0.0.1536.824@0.0.1536.824" timestamp="1634989055031" />
-    <state width="1491" height="100" key="GridCell.Tab.0.bottom" timestamp="1635425098187">
+    <state width="1491" height="180" key="GridCell.Tab.0.bottom" timestamp="1635714750387">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1491" height="100" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1635425098187" />
-    <state width="1491" height="100" key="GridCell.Tab.0.center" timestamp="1635425098186">
+    <state width="1491" height="180" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1635714750387" />
+    <state width="1491" height="180" key="GridCell.Tab.0.center" timestamp="1635714750387">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1491" height="100" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1635425098186" />
-    <state width="1491" height="100" key="GridCell.Tab.0.left" timestamp="1635425098186">
+    <state width="1491" height="180" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1635714750387" />
+    <state width="1491" height="180" key="GridCell.Tab.0.left" timestamp="1635714750387">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1491" height="100" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1635425098186" />
-    <state width="1491" height="100" key="GridCell.Tab.0.right" timestamp="1635425098186">
+    <state width="1491" height="180" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1635714750387" />
+    <state width="1491" height="180" key="GridCell.Tab.0.right" timestamp="1635714750387">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1491" height="100" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1635425098186" />
+    <state width="1491" height="180" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1635714750387" />
     <state width="745" height="210" key="GridCell.Tab.1.bottom" timestamp="1634042061885">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -268,9 +272,9 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="277" y="57" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1634989035468" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1635033238980">
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1635464721260">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1635033238980" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1635464721260" />
   </component>
 </project>
